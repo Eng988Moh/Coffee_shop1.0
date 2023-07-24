@@ -6,9 +6,9 @@ from urllib.request import urlopen
 import requests
 
 
-AUTH0_DOMAIN = 'udacity-fsnd.auth0.com'
+AUTH0_DOMAIN = 'dev-yf1dyr4hofyd06rq.us'
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'dev'
+API_AUDIENCE = 'Coffee'
 
 # AuthError Exception
 '''
@@ -63,8 +63,8 @@ def get_token_auth_header():
     return token
 
 
-def get_token_auth_header():
-    raise Exception('Not Implemented')
+# def get_token_auth_header():
+#     raise Exception('Not Implemented')
 
 
 '''
@@ -90,8 +90,8 @@ def check_permissions(permission, payload):
     return True
 
 
-def check_permissions(permission, payload):
-    raise Exception('Not Implemented')
+# def check_permissions(permission, payload):
+#     raise Exception('Not Implemented')
 
 
 '''
@@ -155,8 +155,8 @@ def verify_decode_jwt(token):
             }, 400)
 
 
-def verify_decode_jwt(token):
-    raise Exception('Not Implemented')
+# def verify_decode_jwt(token):
+#     raise Exception('Not Implemented')
 
 
 '''

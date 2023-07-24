@@ -17,8 +17,8 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-with app.app_context():
-    db_drop_and_create_all()
+# with app.app_context():
+#     db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -31,7 +31,7 @@ with app.app_context():
 '''
 
 
-@app.route('/drinks')
+@app.route('/drinks', methods=['GET'])
 def get_drinks():
     drinks = Drink.query.all()
     return jsonify({
@@ -50,7 +50,7 @@ def get_drinks():
 '''
 
 
-@app.route('/drinks-detail')
+@app.route('/drinks-detail', methods=['GET'])
 def get_drinks_detail():
     drinks = Drink.query.all()
     return jsonify({
@@ -71,17 +71,17 @@ def get_drinks_detail():
 
 
 @app.route('/drinks', methods=['POST'])
-def create_drink():
-    body = request.get_json()
+@requires_auth('post:drinks')
+def create_drink(payload):
+    req = request.get_json()
+
     try:
-        drink = Drink(title=body['title'], recipe=body['recipe'])
+        drink = Drink(title=req['title'], recipe=req['recipe'])
         drink.insert()
-        return jsonify({
-            'success': True,
-            'drinks': [drink.long()]
-        }), 200
-    except:
-        abort(422)
+        return jsonify({'success': True, 'drinks': [drink.long()]}), 200
+
+    except BaseException:
+        abort(400)
 
 
 '''
@@ -98,7 +98,8 @@ def create_drink():
 
 
 @app.route('/drinks/<int:drink_id>', methods=['PATCH'])
-def update_drink(drink_id):
+@requires_auth('patch:drinks')
+def update_drink(payload, drink_id):
     body = request.get_json()
     drink = Drink.query.get(drink_id)
     if drink is None:
@@ -111,7 +112,7 @@ def update_drink(drink_id):
             'success': True,
             'drinks': [drink.long()]
         }), 200
-    except:
+    except BaseException:
         abort(422)
 
 
@@ -128,7 +129,8 @@ def update_drink(drink_id):
 
 
 @app.route('/drinks/<int:drink_id>', methods=['DELETE'])
-def delete_drink(drink_id):
+@requires_auth('delete:drinks')
+def delete_drink(payload, drink_id):
     drink = Drink.query.get(drink_id)
     if drink is None:
         abort(404)
@@ -166,6 +168,12 @@ def unprocessable(error):
 '''
 
 
+'''
+@TODO implement error handler for 404
+    error handler should conform to general task above
+'''
+
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
@@ -173,12 +181,6 @@ def not_found(error):
         "error": 404,
         "message": "resource not found"
     }), 404
-
-
-'''
-@TODO implement error handler for 404
-    error handler should conform to general task above
-'''
 
 
 '''
@@ -194,3 +196,12 @@ def auth_error(error):
         "error": error.status_code,
         "message": error.error
     }), error.status_code
+
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({
+        "success": False,
+        "error": 405,
+        "message": "method not allowed"
+    }), 405
